@@ -22,11 +22,10 @@ jobs:
       - name: Debug screts
         run: echo $SIGNING_KEY_ALIAS $SIGNING_KEY_ALIAS $SIGNING_STORE_PASSWORD
         shell: bash
-          env:
-            SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
-            SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-            SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
-
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -81,12 +80,10 @@ jobs:
       #       SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
       #       SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       #       SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
-        
 
       ## Distribute app to Firebase App Distribution for testing / use google play internal track if you have a google play account
-      - name: upload 
+      - name: upload
         uses: actions/upload-artifact@v2
         with:
           name: Build Artifacts
           path: app/build/outputs/
-          
