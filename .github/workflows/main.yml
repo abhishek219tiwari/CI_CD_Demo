@@ -19,6 +19,15 @@ jobs:
         with:
           java-version: 11.0.15
 
+      - name: Debug screts
+        run: echo $SIGNING_KEY_ALIAS $SIGNING_KEY_ALIAS $SIGNING_STORE_PASSWORD
+        shell: bash
+          env:
+          SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -53,9 +62,9 @@ jobs:
 
       - name: Generate App APK
         run: |
-          cd android && ./gradlew assembleRelease --no-daemon
+          cd android && ./gradlew bundleRelease
 
-      ## sign generated apk
+      # sign generated apk
       - name: Sign APK
         id: sign_app
         uses: r0adkll/sign-android-release@v1
@@ -65,6 +74,13 @@ jobs:
           alias: ${{ secrets.ANDROID_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      # - name: Generate App APK
+      #   run: ./gradlew app:bundleRelease
+      #     env:
+      #       SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
+      #       SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      #       SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
         
 
       ## Distribute app to Firebase App Distribution for testing / use google play internal track if you have a google play account
