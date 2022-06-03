@@ -81,7 +81,7 @@ jobs:
       #       SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       #       SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
 
-      ## Distribute app to Firebase App Distribution for testing / use google play internal track if you have a google play account
+      ## Distribute app to Build artifact 
       - name: upload
         uses: actions/upload-artifact@v2
         with:
