@@ -17,7 +17,6 @@ on:
         required: true
       majorversion:
         description: 'Provide Major Version For Target'
-        default: ''
         required: true
         
        
