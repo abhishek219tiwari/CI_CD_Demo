@@ -31,6 +31,14 @@ jobs:
     runs-on: ubuntu-latest # using ubuntu latest version / or you can use a specific version
 
     steps:
+      - run: |
+          echo "Log level: $LEVEL"
+          echo "Tags: $TAGS"
+          echo "Environment: $ENVIRONMENT"
+        env:
+          LEVEL: ${{ github.event.inputs.logLevel }}
+          TAGS: ${{ github.event.inputs.tags }}
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
       - name: Check out Git repository # clone the repo to local ci workspace
         uses: actions/checkout@v2
 
