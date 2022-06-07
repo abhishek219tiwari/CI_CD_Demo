@@ -21,7 +21,7 @@ on:
         type: environment
         required: true 
       name: 
-        description: minnorversion
+        description: minnorVersion
         default: ''
         required: true
        
