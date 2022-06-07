@@ -3,14 +3,14 @@ name: Android Build ## name of the workflow
 on:
   workflow_dispatch:
     inputs:
-      logLevel:
-        description: 'Log level'     
+      target:
+        description: 'select target'     
         required: true
         default: 'warning' 
         type: choice
         options:
-        - info
-        - warning
+        - caradvise
+        - carclub
         - debug 
       tags:
         description: 'Test scenario tags'
