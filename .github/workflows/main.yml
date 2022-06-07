@@ -3,26 +3,22 @@ name: Android Build ## name of the workflow
 on:
   workflow_dispatch:
     inputs:
-      logLevel:
-        description: 'Log level'     
+      target:
+        description: 'Select Your Target'     
         required: true
-        default: 'warning' 
+        default: 'caradvise'
         type: choice
-        options:
-        - info
-        - warning
-        - debug 
-      tags:
-        description: 'Test scenario tags'
-        required: true
-        type: boolean
-      environment:
-        description: 'Environment to run tests against'
-        type: choice
-        required: true 
         options:
         - caradvise
         - carclub
+      minorversion:
+        description: 'Provide Minor Version For Target'
+        default: ''
+        required: true
+      majorversion:
+        description: 'Provide Major Version For Target'
+        default: ''
+        required: true
         
        
  
@@ -33,13 +29,13 @@ jobs:
 
     steps:
       - run: |
-          echo "Log level: $LEVEL"
-          echo "Tags: $TAGS"
-          echo "Environment: $ENVIRONMENT"
+          echo "Log level: $TARGET"
+          echo "Tags: $MINOR_VERSION"
+          echo "Environment: $MAJOR_VERSION"
         env:
-          LEVEL: ${{ github.event.inputs.logLevel }}
-          TAGS: ${{ github.event.inputs.tags }}
-          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          TARGET: ${{ github.event.inputs.target }}
+          MINOR_VERSION: ${{ github.event.inputs.minorversion }}
+          MAJOR_VERSION: ${{ github.event.inputs.majorversion }}
       - name: Check out Git repository # clone the repo to local ci workspace
         uses: actions/checkout@v2
 
