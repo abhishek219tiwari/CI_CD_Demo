@@ -20,6 +20,10 @@ on:
         description: 'Environment to run tests against'
         type: environment
         required: true 
+      name: 
+        description: minnorversion
+        default: ''
+        required: true
        
  
 jobs:
