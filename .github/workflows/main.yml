@@ -18,8 +18,13 @@ on:
         type: boolean
       environment:
         description: 'Environment to run tests against'
+        default: 'caradvise'
         type: environment
         required: true 
+        options:
+        - caradvise
+        - carclub
+ 
 jobs:
   android-build:
     name: Android Build
