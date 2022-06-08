@@ -41,27 +41,27 @@ jobs:
         with:
           java-version: 11.0.15
 
-      - name: Decode Keystore for caradvise # decode keystore and generate jks/keystore file
-        if: ${{ github.event.inputs.target == 'caradvise' }}
-        id: decode_keystore_for_caradvise
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: "caradvise.jks"
-          encodedString: ${{ secrets.ANDROID_SIGNING_KEY }}
+#       - name: Decode Keystore for caradvise # decode keystore and generate jks/keystore file
+#         if: ${{ github.event.inputs.target == 'caradvise' }}
+#         id: decode_keystore_for_caradvise
+#         uses: timheuer/base64-to-file@v1
+#         with:
+#           fileName: "caradvise.jks"
+#           encodedString: ${{ secrets.ANDROID_SIGNING_KEY }}
 
-      - name: Decode Keystore for carclub # decode keystore and generate jks/keystore file
-        if: ${{ github.event.inputs.target == 'carclub' }}
-        id: decode_keystore_for_carclub
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: "carclub.jks"
-          encodedString: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }} #TODO: please create
+#       - name: Decode Keystore for carclub # decode keystore and generate jks/keystore file
+#         if: ${{ github.event.inputs.target == 'carclub' }}
+#         id: decode_keystore_for_carclub
+#         uses: timheuer/base64-to-file@v1
+#         with:
+#           fileName: "carclub.jks"
+#           encodedString: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }} #TODO: please create
 
-      # - name: move  "jks" to android/app
-      - name: "move keystore"
-        run: |
-          mv ${{steps.decode_keystore.outputs.filePath}} android/app
-          ls android/app
+#       # - name: move  "jks" to android/app
+#       - name: "move keystore"
+#         run: |
+#           mv ${{steps.decode_keystore.outputs.filePath}} android/app
+#           ls android/app
 
       - name: Set up our node configuration
         uses: actions/setup-node@v1
@@ -79,10 +79,56 @@ jobs:
       #________________________________________________________________ create environment for caradvise ________________________________________________________________
 
       - run: echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' }}
 
       - run: echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' }}
 
       - run: echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' }}
+
+      - run: echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
+
+      - run: echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
+
+      - run: echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.flavor == 'production' }}
+
+      - run: echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
+
+      - run: echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.flavor == 'production' }}
+
+      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.flavor == 'production' }}
+
+      - run: echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' || github.event.inputs.target == 'carclub' }}
+
+      - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' || github.event.inputs.target == 'carclub' }}
+
+      - run: echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' || github.event.inputs.flavor == 'production' }}
+
+      - run: echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
+
+      - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' || github.event.inputs.target == 'carclub' }}
+
+      - run: echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' || github.event.inputs.target == 'carclub' }}
+
+      - run: echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' }}
+
+      - run: echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' }}
+
+      - run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+
+      - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
+        if: ${{ github.event.inputs.flavor == 'staging' || github.event.inputs.flavor == 'development' || github.event.inputs.target == 'caradvise' || github.event.inputs.target == 'carclub' }}
 
       - run: echo BASE_API_URL=${{ secrets.PRODUCTION_BASE_API_URL }} >> .env
         if: ${{ github.event.inputs.flavor == 'production' }}
@@ -93,24 +139,8 @@ jobs:
       - run: echo BASE_UBER_APP_URL=${{ secrets.PRODUCTION_BASE_UBER_APP_URL }} >> .env
         if: ${{ github.event.inputs.flavor == 'production' }}
 
-      - run: echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
-
-      - run: echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
-
-      - run: echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
-
-      - run: echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
-
-      - run: echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
-
-      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
-
       - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.PRODUCTION_GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
-
-      - run: echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
-
-      - run: echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
 
       - run: echo FACEBOOK_APP_ID=${{ secrets.PRODUCTION_FACEBOOK_APP_ID }} >> .env
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
@@ -118,28 +148,14 @@ jobs:
       - run: echo FACEBOOK_APP_SECRET=${{ secrets.PRODUCTION_FACEBOOK_APP_SECRET }} >> .env
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
 
-      - run: echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
-
-      - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
-
       - run: echo INTERCOM_APP_ID=${{ secrets.PRODUCTION_INTERCOM_APP_ID }} >> .env
         if: ${{ github.event.inputs.flavor == 'production'}}
 
       - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.PRODUCTION_INTERCOM_API_KEY_ANDROIDD }} >> .env
         if: ${{ github.event.inputs.flavor == 'production'}}
 
-      - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
-
       - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.PRODUCTION_AFFIRM_PUBLIC_KEY }} >> .env
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
-
-      - run: echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
-
-      - run: echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
-
-      - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
-
-      - run: echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
 
       - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.PRODUCTION_BRAINTREE_MERCHANT_ID }} >> .env
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
@@ -157,8 +173,6 @@ jobs:
 
       - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.PRODUCTION_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
-
-      - run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
 
       #________________________________________________________________ create environment for carclub ________________________________________________________________
 
@@ -214,6 +228,10 @@ jobs:
         if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production'}}
 
       #________________________________________________________________********************************________________________________________________________________
+      # configure cash for gradle : will help to reduce build time
+      - name: check .env
+        run: cat .env
+
       # configure cash for gradle : will help to reduce build time
 
       - name: Cache Gradle Wrapper
@@ -327,7 +345,7 @@ jobs:
         id: sign_app_carclub_staging
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: android/app/build/outputs/bundle/clubstagingRelease/
+          releaseDirectory: android/app/build/outputs/bundle/carclubstagingRelease/
           signingKeyBase64: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }}
           alias: ${{ secrets.CARCLUB_RELEASE_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.CARCLUB_RELEASE_STORE_PASSWORD }}
@@ -339,7 +357,7 @@ jobs:
         id: sign_app_carclub_development
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: android/app/build/outputs/bundle/clubdevelopmentRelease/
+          releaseDirectory: android/app/build/outputs/bundle/carclubdevelopmentRelease/
           signingKeyBase64: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }}
           alias: ${{ secrets.CARCLUB_RELEASE_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.CARCLUB_RELEASE_STORE_PASSWORD }}
@@ -351,7 +369,7 @@ jobs:
         id: sign_app_carclub_production
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: android/app/build/outputs/bundle/clubRelease/
+          releaseDirectory: android/app/build/outputs/bundle/carclubRelease/
           signingKeyBase64: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }}
           alias: ${{ secrets.CARCLUB_RELEASE_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.CARCLUB_RELEASE_STORE_PASSWORD }}
@@ -406,7 +424,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.CARCLUB_ANDROID_SERVICE_ACCOUNT_JSON_TEXT }} # please update this with carclub android serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
           packageName: com.carclub.carclub.staging
-          releaseFiles: android/app/build/outputs/bundle/clubstagingRelease/*.aab
+          releaseFiles: android/app/build/outputs/bundle/carclubstagingRelease/*.aab
           track: internal
           status: completed
           inAppUpdatePriority: 2
@@ -418,7 +436,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.CARCLUB_ANDROID_SERVICE_ACCOUNT_JSON_TEXT }} # please update this with carclub android serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
           packageName: com.carclub.carclub.dev
-          releaseFiles: android/app/build/outputs/bundle/clubdevelopmentRelease/*.aab
+          releaseFiles: android/app/build/outputs/bundle/carclubdevelopmentRelease/*.aab
           track: internal
           status: completed
           inAppUpdatePriority: 2
@@ -430,7 +448,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.CARCLUB_ANDROID_SERVICE_ACCOUNT_JSON_TEXT }} # please update this with carclub android serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
           packageName: com.carclub.carclub
-          releaseFiles: android/app/build/outputs/bundle/clubRelease/*.aab
+          releaseFiles: android/app/build/outputs/bundle/carclubRelease/*.aab
           track: internal
           status: completed
           inAppUpdatePriority: 2
