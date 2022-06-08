@@ -44,7 +44,7 @@ jobs:
         with:
           java-version: 1.8
           
-      - name: Set up our JDK environment # setup JDK environment: mandatory as we need to build  android project
+      - name: Set up our JDK environment for carclub # setup JDK environment: mandatory as we need to build  android project
         if: ${{ github.event.inputs.target == 'carclub' }}
         uses: actions/setup-java@v1.4.3
         with:
@@ -52,7 +52,7 @@ jobs:
       - run: echo hello from caradvise
         if: ${{ github.event.inputs.target == 'caradvise' }}
       - run: echo hello from carclub
-        if: ${{ github.event.inputs.target == 'caradvise' }}  
+        if: ${{ github.event.inputs.target == 'carclub' }}  
 #       - name: Debug screts
 #         run: echo $SIGNING_KEY_ALIAS $SIGNING_KEY_ALIAS $SIGNING_STORE_PASSWORD
 #         shell: bash
