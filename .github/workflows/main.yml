@@ -28,7 +28,7 @@ on:
 
 jobs:
   android:
-    name: Publish App To Play Store
+    name: check .envs
     runs-on: ubuntu-latest # [ubuntu-latest,macos-latest]
     steps:
       - name: Check out Git repository # clone the repo to local ci workspace
@@ -175,6 +175,7 @@ jobs:
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
 
       - run: echo BUGSNAG_API_KEY=${{ secrets.CARCLUB_BUGSNAG_API_KEY }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && (github.event.inputs.flavor == 'development' || github.event.inputs.flavor == 'staging') }}
 
       #________________________________________________________________ create environment for carclub ________________________________________________________________
 
