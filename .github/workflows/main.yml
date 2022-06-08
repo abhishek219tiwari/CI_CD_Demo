@@ -48,9 +48,11 @@ jobs:
         if: ${{ github.event.inputs.target == 'carclub' }}
         uses: actions/setup-java@v1.4.3
         with:
-          java-version: 11.0.15    
-      - run: echo hello from caradvise
-        if: ${{ github.event.inputs.target == 'caradvise' }}
+          java-version: 11.0.15 
+      - name: caradvise test   
+        if: ${{ github.event.inputs.target == 'caradvise' }} 
+        run: echo hello from caradvise
+        
       - run: echo hello from carclub
         if: ${{ github.event.inputs.target == 'carclub' }}  
 #       - name: Debug screts
