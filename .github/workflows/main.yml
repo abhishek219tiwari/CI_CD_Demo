@@ -29,29 +29,28 @@ jobs:
     steps:
        - name: "Create env file for caradvise" #create environment
          if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
-         run: |
-          echo ENV=${{ secrets.ENV_STAGE }} >> .env
-          echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
-          echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
-          echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
-          echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
-          echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
-          echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
-          echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
-          echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
-          echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
-          echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
-          echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
-          echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
-          echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
-          echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
-          echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
-          echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
-          echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
-          echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
-          echo BRAINTREE_GPAY_MERCHANT_ID=${{ secrets.BRAINTREE_GPAY_MERCHANT_ID }} >> .env
-          echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
-          echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+       - run: echo ENV=${{ secrets.ENV_STAGE }} >> .env
+       - run: echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
+       - run: echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
+       - run: echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
+       - run: echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
+       - run: echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
+       - run: echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
+       - run: echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
+       - run: echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
+       - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+       - run: echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
+       - run: echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
+       - run: echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
+       - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
+       - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
+       - run: echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
+       - run: echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
+       - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
+       - run: echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
+       - run: echo BRAINTREE_GPAY_MERCHANT_ID=${{ secrets.BRAINTREE_GPAY_MERCHANT_ID }} >> .env
+       - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+       - run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
         
 #        - run: |
 #           echo "Log level: $TARGET"
