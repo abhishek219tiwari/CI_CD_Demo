@@ -43,7 +43,7 @@ jobs:
 
       - name: Decode Keystore for caradvise # decode keystore and generate jks/keystore file
         if: ${{ github.event.inputs.target == 'caradvise' }}
-        id: decode_keystore for caradvise
+        id: decode_keystore_for_caradvise
         uses: timheuer/base64-to-file@v1
         with:
           fileName: "caradvise.jks"
@@ -51,7 +51,7 @@ jobs:
 
       - name: Decode Keystore for carclub # decode keystore and generate jks/keystore file
         if: ${{ github.event.inputs.target == 'carclub' }}
-        id: decode_keystore for carclub
+        id: decode_keystore_for_carclub
         uses: timheuer/base64-to-file@v1
         with:
           fileName: "carclub.jks"
@@ -286,7 +286,7 @@ jobs:
       # sign generated aab for caradvise / staging
       - name: Sign APK For caradvise / staging
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'staging' }}
-        id: sign_app caradvise / staging
+        id: sign_app_caradvise_staging
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/caradvisestagingRelease/
@@ -298,7 +298,7 @@ jobs:
       # sign generated aab for caradvise / development
       - name: Sign APK For caradvise / development
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'development' }}
-        id: sign_app caradvise / development
+        id: sign_app_caradvise_development
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/caradvisedevelopmentRelease/
@@ -310,7 +310,7 @@ jobs:
       # sign generated aab for caradvise / production
       - name: Sign APK For caradvise / production
         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
-        id: sign_app caradvise / production
+        id: sign_app_caradvise_production
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/caradviseRelease/
@@ -324,7 +324,7 @@ jobs:
       # sign generated aab for carclub / staging
       - name: Sign APK For carclub / staging
         if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging' }}
-        id: sign_app carclub / staging
+        id: sign_app_carclub_staging
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/clubstagingRelease/
@@ -336,7 +336,7 @@ jobs:
       # sign generated aab for carclub / development
       - name: Sign APK For carclub / development
         if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development' }}
-        id: sign_app carclub / development
+        id: sign_app_carclub_development
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/clubdevelopmentRelease/
@@ -348,7 +348,7 @@ jobs:
       # sign generated aab for carclub / production
       - name: Sign APK For carclub / production
         if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production' }}
-        id: sign_app carclub / production
+        id: sign_app_carclub_production
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/bundle/clubRelease/
