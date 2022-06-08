@@ -1,151 +1,439 @@
-name: Android Build ## name of the workflow
-
+name: Build and Publish to Default Release Channel
 on:
-  workflow_dispatch:
+  workflow_dispatch: # manully tiggers with inputs
     inputs:
       target:
-        description: 'Select Your Target'     
+        description: "Select Your Target"
         required: true
-        default: 'caradvise'
+        default: "caradvise"
         type: choice
         options:
-        - caradvise
-        - carclub
+          - caradvise
+          - carclub
+      flavor:
+        description: "Select Your Flavor"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - development
+          - production
       minorversion:
-        description: 'Provide Minor Version For Target'
-        default: ''
+        description: "Provide Minor Version For Target" #versionCode
         required: true
       majorversion:
-        description: 'Provide Major Version For Target'
+        description: "Provide Major Version For Target" #versionName
         required: true
-        
-       
- 
+
 jobs:
-  android-build:
-    name: Android Build
-    runs-on: ubuntu-latest # using ubuntu latest version / or you can use a specific version
-
+  android:
+    name: Publish App To Play Store
+    runs-on: ubuntu-latest # [ubuntu-latest,macos-latest]
     steps:
-#        - name: "Create env file for caradvise" #create enavironment
-#          if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
-       - run: echo ENV=${{ secrets.ENV_STAGE }} >> .env
-         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
-       - run: echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
-       - run: echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
-       - run: echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
-       - run: echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
-       - run: echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
-       - run: echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
-       - run: echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
-       - run: echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
-       - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
-       - run: echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
-       - run: echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
-       - run: echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
-       - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
-       - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
-       - run: echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
-       - run: echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
-       - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
-       - run: echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
-       - run: echo BRAINTREE_GPAY_MERCHANT_ID=${{ secrets.BRAINTREE_GPAY_MERCHANT_ID }} >> .env
-       - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
-       - run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
-        
-#        - run: |
-#           echo "Log level: $TARGET"
-#           echo "Tags: $MINOR_VERSION"
-#           echo "Environment: $MAJOR_VERSION"
-#           env:
-#           TARGET: ${{ github.event.inputs.target }}
-#           MINOR_VERSION: ${{ github.event.inputs.minorversion }}
-#           MAJOR_VERSION: ${{ github.event.inputs.majorversion }}
-       - name: Check out Git repository # clone the repo to local ci workspace
-         uses: actions/checkout@v2
+      - name: Check out Git repository # clone the repo to local ci workspace
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false # make it false if you are going to clone private repositories in yarn
 
-       - name: Set up our JDK environment # setup JDK environment: mandatory as we need to build  android project
-         if: ${{ github.event.inputs.target == 'caradvise' }}
-         uses: actions/setup-java@v1.4.3
-         with:
-          java-version: 1.8
-          
-       - name: Set up our JDK environment for carclub # setup JDK environment: mandatory as we need to build  android project
-         if: ${{ github.event.inputs.target == 'carclub' }}
-         uses: actions/setup-java@v1.4.3
-         with:
-          java-version: 11.0.15 
-       - name: caradvise test   
-         if: ${{ github.event.inputs.target == 'caradvise' }} 
-         run: echo hello from caradvise
-        
-       - run: echo hello from carclub
-         if: ${{ github.event.inputs.target == 'carclub' }}  
-#       - name: Debug screts
-#         run: echo $SIGNING_KEY_ALIAS $SIGNING_KEY_ALIAS $SIGNING_STORE_PASSWORD
-#         shell: bash
-#         env:
-#           SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
-#           SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-#           SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+      - name: Set up our JDK environment # setup JDK environment: mandatory as we need to build  android project
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 11.0.15
 
-#       - name: Get yarn cache directory path
-#         id: yarn-cache-dir-path
-#         run: echo "::set-output name=dir::$(yarn cache dir)"
-#       - name: Restore node_modules from cache
-#         uses: actions/cache@v2
-#         id: yarn-cache
-#         with:
-#           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-#           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-#           restore-keys: |
-#             ${{ runner.os }}-yarn-
+      - name: Decode Keystore for caradvise # decode keystore and generate jks/keystore file
+        if: ${{ github.event.inputs.target == 'caradvise' }}
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: "caradvise.jks"
+          encodedString: ${{ secrets.ANDROID_SIGNING_KEY }}
 
-#       - name: Install dependencies # install project deps with --frozen-lockfile to make sure we will have the same packages version ( very recommended  on running yarn install on ci)
-#         run: yarn install --frozen-lockfile
+      - name: Decode Keystore for carclub # decode keystore and generate jks/keystore file
+        if: ${{ github.event.inputs.target == 'carclub' }}
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: "carclub.jks"
+          encodedString: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }} #TODO: please create
 
-#       ## configure cash for gradle : will help to reduce build time
-#       - name: Cache Gradle Wrapper
-#         uses: actions/cache@v2
-#         with:
-#           path: ~/.gradle/wrapper
-#           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+      # - name: move  "jks" to android/app
+      - name: "move keystore"
+        run: |
+          mv ${{steps.decode_keystore.outputs.filePath}} android/app
+          ls android/app
 
-#       - name: Cache Gradle Dependencies
-#         uses: actions/cache@v2
-#         with:
-#           path: ~/.gradle/caches
-#           key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-#           restore-keys: |
-#             ${{ runner.os }}-gradle-caches-
-#       - name: Make Gradlew Executable
-#         run: cd android && chmod +x ./gradlew
+      - name: Set up our node configuration
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
 
-#       - name: Generate App APK
-#         run: |
-#           cd android && ./gradlew assembleRelease
+      - name: git config with PAT_GITHUB
+        run: git config --global url.https://${{ secrets.PAT_GITHUB }}@github.com/.insteadOf https://github.com
 
-#       # sign generated apk
-#       - name: Sign APK
-#         id: sign_app
-#         uses: r0adkll/sign-android-release@v1
-#         with:
-#           releaseDirectory: android/app/build/outputs/apk/release
-#           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-#           alias: ${{ secrets.ANDROID_ALIAS }}
-#           keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
-#           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: Install dependencies # install project deps
+        run: |
+          yarn cache clean
+          yarn install --network-concurrency 1
 
-#       # - name: Generate App APK
-#       #   run: ./gradlew app:bundleRelease
-#       #     env:
-#       #       SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_ALIAS }}
-#       #       SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-#       #       SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+      #________________________________________________________________ create environment for caradvise ________________________________________________________________
 
-#       ## Distribute app to Build artifact 
-#       - name: upload
-#         uses: actions/upload-artifact@v2
-#         with:
-#           name: Build Artifacts
-#           path: ${{steps.sign_app.outputs.signedReleaseFile}}
+      - run: echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
+
+      - run: echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
+
+      - run: echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
+
+      - run: echo BASE_API_URL=${{ secrets.PRODUCTION_BASE_API_URL }} >> .env
+        if: ${{ github.event.inputs.flavor == 'production' }}
+
+      - run: echo BASE_APP_URL=${{ secrets.PRODUCTION_BASE_APP_URL }} >> .env
+        if: ${{ github.event.inputs.flavor == 'production' }}
+
+      - run: echo BASE_UBER_APP_URL=${{ secrets.PRODUCTION_BASE_UBER_APP_URL }} >> .env
+        if: ${{ github.event.inputs.flavor == 'production' }}
+
+      - run: echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
+
+      - run: echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
+
+      - run: echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
+
+      - run: echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
+
+      - run: echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
+
+      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+
+      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.PRODUCTION_GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
+
+      - run: echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
+
+      - run: echo FACEBOOK_APP_ID=${{ secrets.PRODUCTION_FACEBOOK_APP_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo FACEBOOK_APP_SECRET=${{ secrets.PRODUCTION_FACEBOOK_APP_SECRET }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
+
+      - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
+
+      - run: echo INTERCOM_APP_ID=${{ secrets.PRODUCTION_INTERCOM_APP_ID }} >> .env
+        if: ${{ github.event.inputs.flavor == 'production'}}
+
+      - run: echo INTERCOM_API_KEY_ANDROID=${{ secrets.PRODUCTION_INTERCOM_API_KEY_ANDROIDD }} >> .env
+        if: ${{ github.event.inputs.flavor == 'production'}}
+
+      - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
+
+      - run: echo AFFIRM_PUBLIC_KEY=${{ secrets.PRODUCTION_AFFIRM_PUBLIC_KEY }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
+
+      - run: echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
+
+      - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
+
+      - run: echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
+
+      - run: echo BRAINTREE_MERCHANT_ID=${{ secrets.PRODUCTION_BRAINTREE_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
+
+      - run: echo BRAINTREE_GPAY_ENV=${{ secrets.PRODUCTION_BRAINTREE_GPAY_ENV }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
+
+      - run: echo BRAINTREE_GPAY_MERCHANT_ID=${{ secrets.BRAINTREE_GPAY_MERCHANT_ID }} >> .env
+
+      - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'staging'}}
+
+      - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.DEVELOPMENT_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'development'}}
+
+      - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.PRODUCTION_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+
+      #________________________________________________________________ create environment for carclub ________________________________________________________________
+
+      - run: echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.CARCLUB_GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub'}}
+
+      - run: echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.CARCLUB_GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub'}}
+
+      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.CARCLUB_STAGING_GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging'}}
+
+      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.CARCLUB_DEVELOPMENT_GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development'}}
+
+      - run: echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.CARCLUB_PRODUCTION_GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo FACEBOOK_APP_ID=${{ secrets.CARCLUB_STAGING_FACEBOOK_APP_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging'}}
+
+      - run: echo FACEBOOK_APP_SECRET=${{ secrets.CARCLUB_STAGING_FACEBOOK_APP_SECRET }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging'}}
+
+      - run: echo FACEBOOK_APP_ID=${{ secrets.CARCLUB_DEVELOPMENT_FACEBOOK_APP_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development'}}
+
+      - run: echo FACEBOOK_APP_SECRET=${{ secrets.CARCLUB_DEVELOPMENT_FACEBOOK_APP_SECRET }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development'}}
+
+      - run: echo FACEBOOK_APP_ID=${{ secrets.CARCLUB_PRODUCTION_FACEBOOK_APP_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo FACEBOOK_APP_SECRET=${{ secrets.CARCLUB_PRODUCTION_FACEBOOK_APP_SECRET }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo AFFIRM_MERCHANT_NAME=${{ secrets.CARCLUB_AFFIRM_MERCHANT_NAME }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub'}}
+
+      - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.CARCLUB_STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging'}}
+
+      - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.CARCLUB_DEVELOPMENT_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development'}}
+
+      - run: echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.CARCLUB_PRODUCTION_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production'}}
+
+      - run: echo BUGSNAG_API_KEY=${{ secrets.CARCLUB_BUGSNAG_API_KEY }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub'}}
+
+      - run: echo BUGSNAG_API_KEY=${{ secrets.CARCLUB_PRODUCTION_BUGSNAG_API_KEY }} >> .env
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production'}}
+
+      #________________________________________________________________********************************________________________________________________________________
+      # configure cash for gradle : will help to reduce build time
+
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      - name: Make Gradlew Executable
+        run: cd android && chmod +x ./gradlew
+
+      #________________________________________________________________Generate App Bundle for caradvise________________________________________________________________
+
+      # Generate App Bundle for caradvise / staging
+      - name: Generate App Bundle for caradvise / staging
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'staging' }}
+        run: |
+          cd android
+          ./gradlew bundlecaradvisestagingRelease
+
+      # Generate App Bundle for caradvise / development
+      - name: Generate App Bundle for caradvise / development
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'development' }}
+        run: |
+          cd android
+          ./gradlew bundlecaradvisedevelopmentRelease
+
+      # Generate App Bundle for caradvise / production
+      - name: Generate App Bundle for caradvise / production
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
+        run: |
+          cd android
+          ./gradlew bundlecaradviseRelease
+
+      #________________________________________________________________End of Generate App Bundle for caradvise________________________________________________________________
+      #________________________________________________________________ Start of Generate App Bundle for carclub__________________________________________________________________
+
+      # Generate App Bundle for carclub / staging
+      - name: Generate App Bundle for carclub / staging
+        run: |
+          cd android
+          ./gradlew bundlecarclubstagingRelease
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging' }}
+
+      # Generate App Bundle for carclub / development
+      - name: Generate App Bundle for carclub / development
+        run: |
+          cd android
+          ./gradlew bundlecarclubdevelopmentRelease
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development' }}
+
+      # Generate App Bundle for carclub / production
+      - name: Generate App Bundle for carclub / production
+        run: |
+          cd android
+          ./gradlew bundlecarclubRelease
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production' }}
+
+      #________________________________________________________________ Start of Generate App Bundle for carclub__________________________________________________________________
+      #________________________________________________________________ Start of sign generated aab for caradvise__________________________________________________________________
+
+      # sign generated aab for caradvise / staging
+      - name: Sign APK For caradvise / staging
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'staging' }}
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/caradvisestagingRelease/
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      # sign generated aab for caradvise / development
+      - name: Sign APK For caradvise / development
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'development' }}
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/caradvisedevelopmentRelease/
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      # sign generated aab for caradvise / production
+      - name: Sign APK For caradvise / production
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/caradviseRelease/
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      #________________________________________________________________ End of sign generated aab for caradvise__________________________________________________________________
+      #________________________________________________________________ Start of sign generated aab for carclub__________________________________________________________________
+
+      # sign generated aab for carclub / staging
+      - name: Sign APK For carclub / staging
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging' }}
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/clubstagingRelease/
+          signingKeyBase64: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }}
+          alias: ${{ secrets.CARCLUB_RELEASE_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.CARCLUB_RELEASE_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.CARCLUB_RELEASE_KEY_PASSWORD }}
+
+      # sign generated aab for carclub / development
+      - name: Sign APK For carclub / development
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development' }}
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/clubdevelopmentRelease/
+          signingKeyBase64: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }}
+          alias: ${{ secrets.CARCLUB_RELEASE_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.CARCLUB_RELEASE_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.CARCLUB_RELEASE_KEY_PASSWORD }}
+
+      # sign generated aab for carclub / production
+      - name: Sign APK For carclub / production
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production' }}
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/clubRelease/
+          signingKeyBase64: ${{ secrets.CARCLUB_RELEASE_STORE_FILE }}
+          alias: ${{ secrets.CARCLUB_RELEASE_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.CARCLUB_RELEASE_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.CARCLUB_RELEASE_KEY_PASSWORD }}
+
+      #________________________________________________________________ End of sign generated aab for carclub__________________________________________________________________
+      #________________________________________________________________ Start of Upload App to Google Play For caradvise__________________________________________________________________
+
+      #Upload App to Google Play For caradvise / staging
+      - name: Upload App to Google Play caradvise / staging
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'staging' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.caradvise.caradvise.staging
+          releaseFiles: android/app/build/outputs/bundle/caradvisestagingRelease/*.aab
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+
+      #Upload App to Google Play For caradvise / development
+      - name: Upload App to Google Play caradvise / development
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'development' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.caradvise.caradvise.dev
+          releaseFiles: android/app/build/outputs/bundle/caradvisedevelopmentRelease/*.aab
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+
+      #Upload App to Google Play For caradvise / production
+      - name: Upload App to Google Play caradvise / production
+        if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.flavor == 'production' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.caradvise.caradvise
+          releaseFiles: android/app/build/outputs/bundle/caradviseRelease/*.aab
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+
+      #________________________________________________________________ End of Upload App to Google Play For caradvise__________________________________________________________________
+      #________________________________________________________________ Start of Upload App to Google Play For carclub__________________________________________________________________
+
+      #Upload App to Google Play For carclub / staging
+      - name: Upload App to Google Play carclub / staging
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'staging' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.CARCLUB_ANDROID_SERVICE_ACCOUNT_JSON_TEXT }} # please update this with carclub android serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.carclub.carclub.staging
+          releaseFiles: android/app/build/outputs/bundle/clubstagingRelease/*.aab
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+
+      #Upload App to Google Play For carclub / development
+      - name: Upload App to Google Play carclub / development
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'development' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.CARCLUB_ANDROID_SERVICE_ACCOUNT_JSON_TEXT }} # please update this with carclub android serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.carclub.carclub.dev
+          releaseFiles: android/app/build/outputs/bundle/clubdevelopmentRelease/*.aab
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+
+      #Upload App to Google Play For carclub / production
+      - name: Upload App to Google Play carclub / production
+        if: ${{ github.event.inputs.target == 'carclub' && github.event.inputs.flavor == 'production' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.CARCLUB_ANDROID_SERVICE_ACCOUNT_JSON_TEXT }} # please update this with carclub android serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON_TEXT }}
+          packageName: com.carclub.carclub
+          releaseFiles: android/app/build/outputs/bundle/clubRelease/*.aab
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+#________________________________________________________________ End of Upload App to Google Play For caradvise__________________________________________________________________
+
+#________________________________________________________________ Lets Make It ____________________________________________________________________________________________________
