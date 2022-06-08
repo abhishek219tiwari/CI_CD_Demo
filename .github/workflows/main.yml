@@ -27,34 +27,60 @@ jobs:
     runs-on: ubuntu-latest # using ubuntu latest version / or you can use a specific version
 
     steps:
-      - run: |
+       - name: "Create env file for caradvise" #create environment
+         if: ${{ github.event.inputs.target == 'caradvise' }}
+         run: |
+          echo ENV=${{ secrets.ENV_STAGE }} >> .env
+          echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
+          echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
+          echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
+          echo APP_LANDING_PAGE_URL=${{ secrets.APP_LANDING_PAGE_URL }} >> .env
+          echo GOOGLE_MAPS_PLACES_KEY=${{ secrets.GOOGLE_MAPS_PLACES_KEY }} >> .env
+          echo GOOGLE_MAPS_API_KEY_ANDROID=${{ secrets.GOOGLE_MAPS_API_KEY_ANDROID }} >> .env
+          echo GOOGLE_SIGN_IN_KEY_ANDROID=${{ secrets.GOOGLE_SIGN_IN_KEY_ANDROID }} >> .env
+          echo GOOGLE_SIGNIN_CLIENT_ID_ANDROID=${{ secrets.GOOGLE_SIGNIN_CLIENT_ID_ANDROID }} >> .env
+          echo GOOGLE_SIGNIN_REVERSED_CLIENT_ID=${{ secrets.GOOGLE_SIGNIN_REVERSED_CLIENT_ID }} >> .env
+          echo FACEBOOK_APP_ID=${{ secrets.FACEBOOK_APP_ID }} >> .env
+          echo FACEBOOK_APP_SECRET=${{ secrets.FACEBOOK_APP_SECRET }} >> .env
+          echo INTERCOM_APP_ID=${{ secrets.INTERCOM_APP_ID }} >> .env
+          echo INTERCOM_API_KEY_ANDROID=${{ secrets.INTERCOM_API_KEY_ANDROIDD }} >> .env
+          echo AFFIRM_PUBLIC_KEY=${{ secrets.AFFIRM_PUBLIC_KEY }} >> .env
+          echo AFFIRM_MERCHANT_NAME=${{ secrets.AFFIRM_MERCHANT_NAME }} >> .env
+          echo REMOVE_BG_API_KEY=${{ secrets.REMOVE_BG_API_KEY }} >> .env
+          echo BRAINTREE_MERCHANT_ID=${{ secrets.BRAINTREE_MERCHANT_ID }} >> .env
+          echo BRAINTREE_GPAY_ENV=${{ secrets.BRAINTREE_GPAY_ENV }} >> .env
+          echo BRAINTREE_GPAY_MERCHANT_ID=${{ secrets.BRAINTREE_GPAY_MERCHANT_ID }} >> .env
+          echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
+          echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+        
+       - run: |
           echo "Log level: $TARGET"
           echo "Tags: $MINOR_VERSION"
           echo "Environment: $MAJOR_VERSION"
-        env:
+          env:
           TARGET: ${{ github.event.inputs.target }}
           MINOR_VERSION: ${{ github.event.inputs.minorversion }}
           MAJOR_VERSION: ${{ github.event.inputs.majorversion }}
-      - name: Check out Git repository # clone the repo to local ci workspace
-        uses: actions/checkout@v2
+       - name: Check out Git repository # clone the repo to local ci workspace
+         uses: actions/checkout@v2
 
-      - name: Set up our JDK environment # setup JDK environment: mandatory as we need to build  android project
-        if: ${{ github.event.inputs.target == 'caradvise' }}
-        uses: actions/setup-java@v1.4.3
-        with:
+       - name: Set up our JDK environment # setup JDK environment: mandatory as we need to build  android project
+         if: ${{ github.event.inputs.target == 'caradvise' }}
+         uses: actions/setup-java@v1.4.3
+         with:
           java-version: 1.8
           
-      - name: Set up our JDK environment for carclub # setup JDK environment: mandatory as we need to build  android project
-        if: ${{ github.event.inputs.target == 'carclub' }}
-        uses: actions/setup-java@v1.4.3
-        with:
+       - name: Set up our JDK environment for carclub # setup JDK environment: mandatory as we need to build  android project
+         if: ${{ github.event.inputs.target == 'carclub' }}
+         uses: actions/setup-java@v1.4.3
+         with:
           java-version: 11.0.15 
-      - name: caradvise test   
-        if: ${{ github.event.inputs.target == 'caradvise' }} 
-        run: echo hello from caradvise
+       - name: caradvise test   
+         if: ${{ github.event.inputs.target == 'caradvise' }} 
+         run: echo hello from caradvise
         
-      - run: echo hello from carclub
-        if: ${{ github.event.inputs.target == 'carclub' }}  
+       - run: echo hello from carclub
+         if: ${{ github.event.inputs.target == 'carclub' }}  
 #       - name: Debug screts
 #         run: echo $SIGNING_KEY_ALIAS $SIGNING_KEY_ALIAS $SIGNING_STORE_PASSWORD
 #         shell: bash
