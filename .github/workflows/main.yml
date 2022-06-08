@@ -27,9 +27,10 @@ jobs:
     runs-on: ubuntu-latest # using ubuntu latest version / or you can use a specific version
 
     steps:
-       - name: "Create env file for caradvise" #create enavironment
-         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
+#        - name: "Create env file for caradvise" #create enavironment
+#          if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
        - run: echo ENV=${{ secrets.ENV_STAGE }} >> .env
+         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
        - run: echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
        - run: echo BASE_APP_URL=${{ secrets.BASE_APP_URL }} >> .env
        - run: echo BASE_UBER_APP_URL=${{ secrets.BASE_UBER_APP_URL }} >> .env
