@@ -71,10 +71,10 @@ jobs:
       - name: git config with PAT_GITHUB
         run: git config --global url.https://${{ secrets.PAT_GITHUB }}@github.com/.insteadOf https://github.com
 
-      - name: Install dependencies # install project deps
-        run: |
-          yarn cache clean
-          yarn install --network-concurrency 1
+#       - name: Install dependencies # install project deps
+#         run: |
+#           yarn cache clean
+#           yarn install --network-concurrency 1
 
       #________________________________________________________________ create environment for caradvise ________________________________________________________________
 
