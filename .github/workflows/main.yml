@@ -53,14 +53,14 @@ jobs:
           echo STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID=${{ secrets.STAGING_BRAINTREE_APPLEPAY_MERCHANT_ID }} >> .env
           echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
         
-       - run: |
-          echo "Log level: $TARGET"
-          echo "Tags: $MINOR_VERSION"
-          echo "Environment: $MAJOR_VERSION"
-          env:
-          TARGET: ${{ github.event.inputs.target }}
-          MINOR_VERSION: ${{ github.event.inputs.minorversion }}
-          MAJOR_VERSION: ${{ github.event.inputs.majorversion }}
+#        - run: |
+#           echo "Log level: $TARGET"
+#           echo "Tags: $MINOR_VERSION"
+#           echo "Environment: $MAJOR_VERSION"
+#           env:
+#           TARGET: ${{ github.event.inputs.target }}
+#           MINOR_VERSION: ${{ github.event.inputs.minorversion }}
+#           MAJOR_VERSION: ${{ github.event.inputs.majorversion }}
        - name: Check out Git repository # clone the repo to local ci workspace
          uses: actions/checkout@v2
 
