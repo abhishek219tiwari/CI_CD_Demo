@@ -28,7 +28,7 @@ jobs:
 
     steps:
        - name: "Create env file for caradvise" #create environment
-         if: ${{ github.event.inputs.target == 'caradvise' }}
+         if: ${{ github.event.inputs.target == 'caradvise' && github.event.inputs.minorversion == '1' }}
          run: |
           echo ENV=${{ secrets.ENV_STAGE }} >> .env
           echo BASE_API_URL=${{ secrets.BASE_API_URL }} >> .env
