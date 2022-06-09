@@ -31,6 +31,11 @@ jobs:
     name: check .envs
     runs-on: ubuntu-latest # [ubuntu-latest,macos-latest]
     steps:
+      - name: Use output
+        # Now I can access my parameter in a similar fashion to github.events.inputs.name
+        run: |
+         echo "Hello ${{ github.event.inputs.minorversion }}"
+         echo "Hello ${{ github.event.inputs.majorversion }}"
       - name: Check out Git repository # clone the repo to local ci workspace
         uses: actions/checkout@v2
         with:
